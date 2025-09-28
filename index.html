@@ -826,18 +826,19 @@
     exportBtn.addEventListener('click', exportarLista);
     importFile.addEventListener('change', importarLista);
     
-    // NOVO: Código para registar o Service Worker (PWA)
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registado com sucesso:', registration);
-          })
-          .catch(error => {
-            console.log('Registo do ServiceWorker falhou:', error);
-          });
+// NOVO: Código para registar o Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // ATENÇÃO: Corrigimos o caminho para incluir o nome do repositório
+    navigator.serviceWorker.register('/listadecompras/service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registado com sucesso:', registration);
+      })
+      .catch(error => {
+        console.log('Registo do ServiceWorker falhou:', error);
       });
-    }
+  });
+}
 
 
     // Chamada Inicial

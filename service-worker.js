@@ -1,11 +1,9 @@
 const CACHE_NAME = 'lista-compras-v1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    // Caminhos relativos para os ícones
-    '/images/icon-192x192.png', 
-    '/images/icon-512x512.png',
-    // Adicione aqui todos os ficheiros da sua app se os tiver separado (ex: /app.css, /app.js)
+    '/listadecompras/',
+    '/listadecompras/index.html',
+    '/listadecompras/images/icon-192x192.png', 
+    '/listadecompras/images/icon-512x512.png',
 ];
 
 // Instalação: Guarda todos os ficheiros essenciais na cache
@@ -17,7 +15,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting(); // Garante que o novo service worker assume o controlo imediatamente
+  self.skipWaiting(); 
 });
 
 // Busca (Fetch): Serve recursos a partir da cache primeiro
@@ -25,11 +23,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // Retorna o recurso da cache se estiver lá
         if (response) {
           return response;
         }
-        // Caso contrário, tenta obter da rede
         return fetch(event.request);
       })
   );
@@ -43,7 +39,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            // Elimina qualquer cache não listada na cacheWhitelist
             return caches.delete(cacheName);
           }
         })
