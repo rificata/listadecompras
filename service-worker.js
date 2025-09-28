@@ -1,7 +1,10 @@
 const CACHE_NAME = 'lista-compras-v1';
 const urlsToCache = [
+    // Caminhos Absolutos
     '/listadecompras/',
     '/listadecompras/index.html',
+    '/listadecompras/manifest.json', // Adicionar o Manifest
+    '/listadecompras/service-worker.js', // Adicionar o próprio SW
     '/listadecompras/images/icon-192x192.png', 
     '/listadecompras/images/icon-512x512.png',
 ];
