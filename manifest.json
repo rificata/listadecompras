@@ -3,7 +3,7 @@
   "short_name": "Lista de Compras",
   "description": "Lista de Compras",
   "start_url": "/listadecompras/index.html",
-  "scope": "/listadecompras/",  <--- ADICIONAR ESTA LINHA!
+  "scope": "/listadecompras/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#ff9800",
