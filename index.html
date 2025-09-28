@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Lista de Compras 🛒</title>
+
+    <link rel="manifest" href="./manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#ff9800">
+    <style>
+        /* [O SEU CSS COMPLETO PERMANECE AQUI, SEM ALTERAÇÕES] */
+        /* 1. VARIÁVEIS CSS (Melhores Cores de Ícones) */
+        :root {
+            /* Cores Escuras (Dark Mode) */
+            --cor-fundo: #121212;
+            --cor-fundo-container: #1e1e1e;
+            --cor-fundo-input: #2a2a2a;
+            --cor-texto: #eee;
+            --cor-borda-separador: #333;
+            /* Cores de Ação */
+            --cor-primaria: #ff9800; /* Laranja principal */
+            --cor-primaria-hover: #ffa726;
+            --cor-secundaria: #000;
+            --cor-perigo: #e53935; /* Vermelho */
+            --cor-perigo-hover: #f44336;
+            
+            /* Cores de Ícones para melhor contraste */
+            --cor-icone-principal: #66bb6a; /* Verde Suave para VISTO */
+            --cor-icone-quantidade: #03a9f4; /* Azul Suave para +/- */
+            --cor-icone-remover: var(--cor-perigo);
+            --cor-icone-export: #ffeb3b; /* Amarelo para Export/Import */
+        }
+
+        /* 2. Otimização de Box-sizing */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            margin: 0;
+            min-height: 100dvh; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        h1 {
+            margin: 20px 0;
+            color: var(--cor-primaria);
+            font-size: 2em; 
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            background: var(--cor-fundo-container);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
+
+        /* Agrupamento de Inputs e Botões */
+        .input-group, .search-group, .filtros {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input, button {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+
+        input {
+            flex: 1;
+            background: var(--cor-fundo-input);
+            color: var(--cor-texto);
+            color-scheme: dark;
+        }
+        
+        input::placeholder {
+            color: #999;
+        }
+
+        button {
+            background: var(--cor-primaria);
+            color: var(--cor-secundaria);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: var(--cor-primaria-hover);
+        }
+
+        /* Secção da Categoria */
+        .categoria {
+            margin-bottom: 20px;
+        }
+        
+        .categoria h2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding-bottom: 5px;
+            font-size: 1.2em;
+            border-bottom: 1px solid var(--cor-borda-separador);
+            color: var(--cor-primaria-hover);
+            cursor: pointer;
+        }
+        
+        .categoria h2:focus > .categoria-nome-display {
+             background-color: #333;
+             border-radius: 4px;
+        }
+
+        .categoria-nome-display {
+            flex-grow: 1;
+            margin-right: 10px;
+            padding: 5px;
+            transition: background-color 0.2s;
+            outline: none; 
+        }
+
+        .categoria-nome-display:hover, .categoria-nome-display:focus {
+            background-color: #333;
+            border-radius: 4px;
+        }
+
+        .categoria-h2-acoes {
+            display: flex;
+            align-items: center;
+            gap: 10px; 
+        }
+
+        .categoria-h2-acoes button {
+            padding: 5px 8px;
+            background: transparent;
+            color: var(--cor-icone-remover);
+            font-weight: normal;
+        }
+
+        .toggle-icon {
+            font-size: 0.8em;
+            color: #bbb;
+            pointer-events: none; 
+            margin-left: 5px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--cor-fundo-input);
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        li.comprado {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        
+        .item-nome-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            margin-right: 10px;
+            cursor: pointer;
+            flex-shrink: 1; 
+            overflow: hidden;
+        }
+        
+        .item-nome {
+            padding: 5px;
+            margin-right: 5px;
+            word-break: break-word;
+            transition: background-color 0.2s;
+            outline: none;
+            flex-grow: 1; 
+        }
+
+        .item-nome:hover, .item-nome:focus {
+            background-color: #333;
+            border-radius: 4px;
+        }
+
+        /* ACTIONS: Grupo de botões */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0; 
+        }
+        
+        /* Quantidade no centro */
+        .item-quantidade-display {
+            font-weight: bold;
+            color: var(--cor-icone-quantidade);
+            padding: 0 8px;
+            min-width: 25px; 
+            text-align: center;
+        }
+
+        .actions button {
+            padding: 8px;
+            font-size: 14px;
+            min-width: 30px;
+            background: #444; 
+            color: var(--cor-texto);
+        }
+
+        .actions button:hover {
+            background: #555;
+        }
+        
+        .actions button[data-action="decrease"],
+        .actions button[data-action="increase"] {
+            color: var(--cor-icone-quantidade); 
+        }
+
+        .actions .btn-toggle {
+            color: var(--cor-icone-principal); 
+        }
+        
+        .actions .btn-remove {
+            color: var(--cor-icone-remover); 
+        }
+        
+        /* Secção de Ferramentas (Export/Import) */
+        .tools-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--cor-borda-separador);
+        }
+
+        .tools-group button, .tools-group input {
+            flex: 1;
+            min-width: 120px;
+            background: var(--cor-fundo-input);
+            color: var(--cor-icone-export);
+            font-weight: bold;
+        }
+        
+        .tools-group button:hover {
+            background: #333;
+        }
+
+
+        /* Botão Limpar Comprados */
+        .btn-limpar {
+            margin-top: 15px;
+            width: 100%;
+            background: var(--cor-perigo);
+            color: var(--cor-texto);
+        }
+
+        .btn-limpar:hover {
+            background: var(--cor-perigo-hover);
+        }
+
+        /* Botões de Filtro (sem alterações significativas) */
+        .filtros button {
+            flex: 1;
+            margin: 0;
+            background: var(--cor-fundo-input);
+            color: var(--cor-texto);
+        }
+
+        .filtros button.active {
+            background: var(--cor-primaria);
+            color: var(--cor-secundaria);
+            box-shadow: 0 0 5px var(--cor-primaria);
+        }
+
+        /* OTIMIZAÇÃO E ADAPTAÇÃO MOBILE */
+        @media (max-width: 650px) {
+            .input-group, .search-group {
+                flex-direction: column;
+            }
+            
+            .input-group input {
+                width: 100%;
+                margin-bottom: 5px;  
+            }
+
+            .input-group button {
+                width: 100%;
+                margin-top: 5px;
+            }
+
+            .filtros {
+                justify-content: space-between;
+            }
+            
+            .filtros button {
+                flex-basis: calc(33.33% - 7px);
+                margin: 0;
+            }
+
+            li {
+                padding: 15px 12px;
+            }
+            
+            .tools-group {
+                 flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🛒 Lista de Compras</h1>
+    <div class="container">
+        <form id="addItemForm" class="input-group">
+            <input type="text" id="itemInput" placeholder="Produto..." aria-label="Nome do produto" required>
+            <input 
+                type="text" 
+                id="categoriaInput" 
+                list="categoriaSuggestions" 
+                placeholder="Categoria (escolha ou digite)..." 
+                aria-label="Categoria do produto">
+            <datalist id="categoriaSuggestions"></datalist>
+            <button type="submit">Adicionar</button>
+        </form>
+
+        <div class="search-group">
+            <input type="text" id="searchInput" placeholder="🔍 Pesquisar produto..." aria-label="Pesquisar na lista">
+        </div>
+
+        <div class="filtros" id="filtroBotoes">
+            <button data-filter="todos" class="active">Todos</button>
+            <button data-filter="pendentes">Pendentes</button>
+            <button data-filter="comprados">Comprados</button>
+        </div>
+
+        <div id="listaCategorias"></div>
+
+        <button class="btn-limpar" id="limparCompradosBtn">🗑️ Limpar comprados</button>
+        
+        <div class="tools-group">
+            <button id="exportBtn">📥 Exportar (.json)</button>
+            <label for="importFile" style="display: none;">Importar Lista</label>
+            <input type="file" id="importFile" accept=".json" style="padding: 10px; cursor: pointer;">
+        </div>
+    </div>
+
+<script>
+    // [O SEU JAVASCRIPT COMPLETO PERMANECE AQUI, COM A LÓGICA DE PROGRAMAÇÃO]
+    
+    // Constantes e Variáveis
+    const LS_KEY = "listaCompras";
+    const LS_KEY_EXPANSION = "categoriasExpanded"; 
+
+    // Categorias Padrão
+    const CATEGORIAS_PADRAO = [
+        "Bebidas", "Carne", "Charcutaria", "Congelados", "Despensa", 
+        "Frutas", "Higiene", "Laticínios", "Legumes", "Limpeza", 
+        "Massas, Arroz & Leguminosas", "Peixe & Marisco", "Pão & Padaria", 
+        "Snacks & Doces", "Temperos & Condimentos"
+    ];
+
+    let categorias = JSON.parse(localStorage.getItem(LS_KEY)) || {};
+    let estadoExpansao = JSON.parse(localStorage.getItem(LS_KEY_EXPANSION)) || {};
+    let filtroAtual = "todos";
+    
+    // Cache dos elementos DOM
+    const itemInput = document.getElementById("itemInput");
+    const categoriaInput = document.getElementById("categoriaInput");
+    const categoriaSuggestions = document.getElementById("categoriaSuggestions");
+    const searchInput = document.getElementById("searchInput");
+    const listaDiv = document.getElementById("listaCategorias");
+    const filtroBotoes = document.getElementById("filtroBotoes");
+    const addItemForm = document.getElementById("addItemForm");
+    const limparCompradosBtn = document.getElementById("limparCompradosBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const importFile = document.getElementById("importFile");
+    
+    // --- FUNÇÕES DE UTILIDADE ---
+
+    const salvarLista = () => {
+        localStorage.setItem(LS_KEY, JSON.stringify(categorias));
+    };
+
+    const salvarEstadoExpansao = () => {
+        localStorage.setItem(LS_KEY_EXPANSION, JSON.stringify(estadoExpansao));
+    };
+
+    const formatarCategoriaParaChave = (str) => {
+        return str.trim().toLowerCase();
+    };
+
+    const formatarItemParaExibicao = (str) => {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    };
+
+    const atualizarDatalist = () => {
+        let sugestoes = new Set();
+        
+        Object.keys(categorias).forEach(chave => {
+            if(categorias[chave].length > 0 || CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).includes(chave)) {
+                sugestoes.add(chave);
+            }
+        });
+        
+        CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).forEach(chave => sugestoes.add(chave));
+
+        let opcoes = Array.from(sugestoes)
+                         .sort((a, b) => a.localeCompare(b))
+                         .map(chave => formatarItemParaExibicao(chave));
+
+        categoriaSuggestions.innerHTML = opcoes.map(op => `<option value="${op}">`).join('');
+    };
+    
+    // --- LÓGICA DE APLICAÇÃO ---
+
+    const inicializarCategorias = () => {
+        CATEGORIAS_PADRAO.forEach(cat => {
+            const chave = formatarCategoriaParaChave(cat);
+            if (estadoExpansao[chave] === undefined) {
+                 estadoExpansao[chave] = true;
+            }
+        });
+        salvarEstadoExpansao();
+    };
+
+    inicializarCategorias();
+
+    const adicionarItem = (event) => {
+        event.preventDefault(); 
+        
+        const itemBruto = itemInput.value.trim();
+        const itemNome = formatarItemParaExibicao(itemBruto); 
+
+        const categoriaBruta = categoriaInput.value.trim() || "Geral";
+        const categoriaChave = formatarCategoriaParaChave(categoriaBruta); 
+
+        if (!itemBruto) return; 
+
+        if (!categorias[categoriaChave]) categorias[categoriaChave] = [];
+        
+        if (estadoExpansao[categoriaChave] === undefined) {
+            estadoExpansao[categoriaChave] = true;
+            salvarEstadoExpansao();
+        }
+        
+        const novoItem = { 
+            id: Date.now(), 
+            nome: itemNome, 
+            quantidade: 1, 
+            comprado: false 
+        };
+        categorias[categoriaChave].push(novoItem);
+
+        itemInput.value = "";
+        categoriaInput.value = "";
+
+        salvarLista();
+        renderizarLista();
+    };
+
+    const getItemId = (categoria, id) => {
+        return categorias[categoria].findIndex(item => item.id.toString() === id.toString());
+    }
+
+    const alterarQuantidade = (categoria, id, delta) => {
+        const index = getItemId(categoria, id);
+        if (index === -1) return;
+        categorias[categoria][index].quantidade = Math.max(1, categorias[categoria][index].quantidade + delta);
+        salvarLista();
+        renderizarLista();
+    };
+
+    const toggleComprado = (categoria, id) => {
+        const index = getItemId(categoria, id);
+        if (index === -1) return;
+        categorias[categoria][index].comprado = !categorias[categoria][index].comprado;
+        salvarLista();
+        renderizarLista();
+    };
+
+    const removerItem = (categoria, id) => {
+        const index = getItemId(categoria, id);
+        if (index === -1) return;
+        categorias[categoria].splice(index, 1);
+        if (!categorias[categoria].length) delete categorias[categoria]; 
+        salvarLista();
+        renderizarLista();
+    };
+
+    const limparComprados = () => {
+        if (!confirm("Tem certeza que deseja remover todos os itens comprados?")) return;
+        for (const cat in categorias) {
+            categorias[cat] = categorias[cat].filter(item => !item.comprado);
+            if (!categorias[cat].length) {
+                const isPadrao = CATEGORIAS_PADRAO.map(c => formatarCategoriaParaChave(c)).includes(cat);
+                if(!isPadrao) {
+                    delete categorias[cat];
+                }
+            }
+        }
+        salvarLista();
+        renderizarLista();
+    };
+
+    const setFiltro = (tipo) => {
+        filtroAtual = tipo;
+        document.querySelectorAll("#filtroBotoes button").forEach(btn => btn.classList.remove("active"));
+        document.querySelector(`#filtroBotoes button[data-filter="${tipo}"]`).classList.add("active");
+        renderizarLista();
+    };
+    
+    const toggleCategoria = (categoriaChave, h2Element) => {
+        estadoExpansao[categoriaChave] = !estadoExpansao[categoriaChave];
+        salvarEstadoExpansao();
+
+        const ul = h2Element.closest('.categoria').querySelector('ul');
+        const span = h2Element.querySelector('.toggle-icon');
+        const isExpanded = estadoExpansao[categoriaChave];
+        
+        ul.style.display = isExpanded ? 'block' : 'none';
+        span.textContent = isExpanded ? '▼' : '▲';
+        h2Element.setAttribute('aria-expanded', isExpanded);
+    };
+
+    const editarCategoria = (categoriaChave, novoNomeBruto) => {
+        const novoNomeChave = formatarCategoriaParaChave(novoNomeBruto);
+
+        if (novoNomeChave === categoriaChave || !novoNomeBruto.trim()) {
+            renderizarLista();
+            return;
+        }
+
+        if (categorias[novoNomeChave]) {
+            alert("Essa categoria já existe! Tente outro nome.");
+            renderizarLista();
+            return;
+        }
+
+        categorias[novoNomeChave] = categorias[categoriaChave];
+        delete categorias[categoriaChave];
+        
+        estadoExpansao[novoNomeChave] = estadoExpansao[categoriaChave];
+        delete estadoExpansao[categoriaChave];
+
+        salvarLista();
+        salvarEstadoExpansao();
+        renderizarLista(); 
+    };
+
+    const editarItem = (categoria, id, novoNomeBruto) => {
+        const index = getItemId(categoria, id);
+        if (index === -1) return;
+
+        const novoNomeFormatado = formatarItemParaExibicao(novoNomeBruto);
+
+        if (!novoNomeFormatado.trim()) {
+            alert("O nome do item não pode estar vazio.");
+            renderizarLista();
+            return;
+        }
+        
+        categorias[categoria][index].nome = novoNomeFormatado;
+        salvarLista();
+        renderizarLista();
+    };
+
+    const renderizarLista = () => {
+        const search = searchInput.value.toLowerCase();
+        listaDiv.innerHTML = ""; 
+        
+        atualizarDatalist();
+
+        let todasCategoriasChaves = new Set(Object.keys(categorias));
+        CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).forEach(chave => todasCategoriasChaves.add(chave));
+        
+        let categoriasOrdenadas = Array.from(todasCategoriasChaves).sort((a,b) => a.localeCompare(b));
+
+        categoriasOrdenadas.forEach(cat => {
+            const itensDaCategoria = categorias[cat] || [];
+            
+            let itensFiltrados = itensDaCategoria.filter(item => {
+                const matchesFiltro = (filtroAtual === "todos") || 
+                                     (filtroAtual === "pendentes" && !item.comprado) || 
+                                     (filtroAtual === "comprados" && item.comprado);
+                const matchesSearch = item.nome.toLowerCase().includes(search);
+                return matchesFiltro && matchesSearch;
+            });
+
+            const isCategoriaPadrao = CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).includes(cat);
+            if (!itensFiltrados.length && !isCategoriaPadrao) return;
+            if (!itensFiltrados.length && search.length > 0) return;
+
+            const categoriaParaExibir = cat.toUpperCase();
+            
+            const isExpanded = estadoExpansao[cat] !== false; 
+            const displayStyle = isExpanded ? 'block' : 'none';
+            const toggleIcon = isExpanded ? '▼' : '▲';
+
+            let ulContent = itensFiltrados.sort((a,b) => a.nome.localeCompare(b.nome)).map(item => `
+                <li class="${item.comprado ? 'comprado' : ''}" data-item-id="${item.id}" data-categoria="${cat}">
+                    <div class="item-nome-container">
+                        <span class="item-nome" contenteditable="true" data-field="nome" aria-label="Editar nome do item">${item.nome}</span>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn-qty" data-action="decrease" aria-label="Diminuir quantidade de ${item.nome}">➖</button>
+                        <span class="item-quantidade-display">${item.quantidade}</span>
+                        <button class="btn-qty" data-action="increase" aria-label="Aumentar quantidade de ${item.nome}">➕</button>
+                        <button class="btn-toggle" aria-label="Marcar/Desmarcar ${item.nome} como comprado">✔️</button>
+                        <button class="btn-remove" aria-label="Remover ${item.nome}">🗑️</button>
+                    </div>
+                </li>
+            `).join('');
+
+            if (!itensFiltrados.length && isCategoriaPadrao) {
+                ulContent = ``;
+            }
+
+            const categoriaHTML = `
+                <div class="categoria" data-categoria-nome="${cat}">
+                    <h2 tabindex="0" role="button" aria-expanded="${isExpanded}" aria-controls="ul-${cat.replace(/\s/g, '-')}" class="titulo-categoria">
+                        <span class="categoria-nome-display" contenteditable="true" data-field="categoria">${categoriaParaExibir}</span>
+                        <div class="categoria-h2-acoes">
+                             <button class="btn-remove-cat" aria-label="Remover categoria ${categoriaParaExibir}">🗑️</button>
+                             <span class="toggle-icon">${toggleIcon}</span>
+                        </div>
+                    </h2>
+                    <ul id="ul-${cat.replace(/\s/g, '-')}" role="list" style="display: ${displayStyle};">${ulContent}</ul>
+                </div>
+            `;
+
+            listaDiv.insertAdjacentHTML('beforeend', categoriaHTML);
+        });
+        
+        setupEventListeners();
+    };
+
+    const handleEditFinish = (event) => {
+        const target = event.target;
+        const novoValor = target.textContent.trim(); 
+        const field = target.dataset.field;
+        
+        if (event.type === 'keydown' && event.keyCode !== 13) return;
+        
+        event.preventDefault(); 
+        
+        setTimeout(() => {
+             target.blur();
+        }, 0);
+        
+        if (field === 'categoria') {
+            const categoriaElement = target.closest('.categoria');
+            const categoriaChaveAntiga = categoriaElement.dataset.categoriaNome;
+            editarCategoria(categoriaChaveAntiga, novoValor);
+        } else if (field === 'nome') {
+            const li = target.closest('li');
+            const cat = li.dataset.categoria; 
+            const id = li.dataset.itemId;
+            editarItem(cat, id, novoValor);
+        }
+    };
+    
+    // --- LÓGICA DE EXPORTAÇÃO E IMPORTAÇÃO ---
+    
+    const exportarLista = () => {
+        const dataStr = JSON.stringify({
+            categorias: categorias,
+            estadoExpansao: estadoExpansao,
+        }, null, 2); 
+        
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        
+        const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
+        a.download = `lista_compras_${date}.json`;
+        a.href = url;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert(`Lista de Compras exportada para ${a.download}!`);
+    };
+    
+    const importarLista = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!confirm(`Tem certeza que deseja importar "${file.name}"? A lista atual será substituída.`)) {
+            importFile.value = ''; 
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                
+                if (importedData.categorias && typeof importedData.categorias === 'object') {
+                    categorias = importedData.categorias;
+                    
+                    if(importedData.estadoExpansao) {
+                        estadoExpansao = importedData.estadoExpansao;
+                        salvarEstadoExpansao();
+                    } else {
+                        estadoExpansao = {};
+                        inicializarCategorias();
+                    }
+
+                    salvarLista();
+                    renderizarLista();
+                    alert(`Lista de Compras importada com sucesso de "${file.name}"!`);
+                } else {
+                    throw new Error("Estrutura do arquivo JSON inválida.");
+                }
+            } catch (error) {
+                alert(`Erro ao importar o ficheiro: ${error.message}`);
+            }
+            importFile.value = '';
+        };
+
+        reader.readAsText(file);
+    };
+
+
+    const setupEventListeners = () => {
+        listaDiv.onclick = (e) => {
+            const target = e.target;
+            const li = target.closest('li');
+            const h2 = target.closest('h2.titulo-categoria');
+            const catDiv = target.closest('.categoria');
+
+            // 1. Lógica de Expansão/Compressão (CORRIGIDA)
+            if (h2 && !target.closest('.categoria-nome-display') && !target.classList.contains('btn-remove-cat')) {
+                const categoriaChave = catDiv.dataset.categoriaNome;
+                toggleCategoria(categoriaChave, h2);
+                return;
+            }
+            
+            // 2. Remover Categoria
+            if (target.classList.contains('btn-remove-cat')) {
+                const categoriaChave = catDiv.dataset.categoriaNome;
+                 if (confirm(`Tem certeza que deseja remover a categoria "${categoriaChave.toUpperCase()}" e todos os seus itens?`)) {
+                    delete categorias[categoriaChave];
+                    delete estadoExpansao[categoriaChave];
+                    salvarLista();
+                    salvarEstadoExpansao();
+                    renderizarLista();
+                }
+                return;
+            }
+
+            // 3. Ações do Item
+            if (li) {
+                const cat = li.dataset.categoria; 
+                const id = li.dataset.itemId;
+
+                if (target.classList.contains('btn-qty')) {
+                    const delta = target.dataset.action === 'increase' ? 1 : -1;
+                    alterarQuantidade(cat, id, delta);
+                } else if (target.classList.contains('btn-toggle')) {
+                    toggleComprado(cat, id);
+                } else if (target.classList.contains('btn-remove')) {
+                    removerItem(cat, id);
+                } else if (target.closest('.item-nome-container')) { 
+                    if (!target.classList.contains('item-nome')) {
+                         toggleComprado(cat, id);
+                    }
+                }
+            }
+        };
+        
+        // Listener para Edição In-Place
+        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+            element.removeEventListener('blur', handleEditFinish);
+            element.removeEventListener('keydown', handleEditFinish);
+            element.removeEventListener('keypress', (e) => { if (e.keyCode === 13) e.preventDefault(); });
+            
+            element.addEventListener('blur', handleEditFinish);
+            element.addEventListener('keydown', handleEditFinish);
+            
+            element.addEventListener('keypress', (e) => {
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                }
+            });
+        });
+    };
+
+    // Configuração Inicial dos Listeners Globais
+    addItemForm.addEventListener('submit', adicionarItem);
+    searchInput.addEventListener('input', renderizarLista);
+    limparCompradosBtn.addEventListener('click', limparComprados);
+    
+    filtroBotoes.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON' && e.target.dataset.filter) {
+            setFiltro(e.target.dataset.filter);
+        }
+    });
+
+    exportBtn.addEventListener('click', exportarLista);
+    importFile.addEventListener('change', importarLista);
+    
+// NOVO: Código para registar o Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // ATENÇÃO: Corrigimos o caminho para incluir o nome do repositório
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registado com sucesso:', registration);
+      })
+      .catch(error => {
+        console.log('Registo do ServiceWorker falhou:', error);
+      });
+  });
+}
+
+
+    // Chamada Inicial
+    renderizarLista();
+</script>
+</body>
+</html>
