@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#ff9800">
     <style>
-        /* [O SEU CSS COMPLETO PERMANECE AQUI, SEM ALTERAÇÕES] */
         /* 1. VARIÁVEIS CSS (Melhores Cores de Ícones) */
         :root {
             /* Cores Escuras (Dark Mode) */
@@ -150,6 +149,12 @@
             color: var(--cor-icone-remover);
             font-weight: normal;
         }
+        
+        /* NOVO: Estilo para botão Marcar Todos Categoria */
+        .categoria-h2-acoes .btn-mass-toggle-cat {
+            color: var(--cor-icone-principal);
+        }
+
 
         .toggle-icon {
             font-size: 0.8em;
@@ -269,11 +274,40 @@
             background: #333;
         }
 
-
-        /* Botão Limpar Comprados */
-        .btn-limpar {
+        /* NOVO: Estilos para Ações em Massa */
+        .mass-actions-group, .toggle-all-group {
+            display: flex;
+            gap: 10px;
             margin-top: 15px;
             width: 100%;
+        }
+
+        .mass-actions-group button, .toggle-all-group button {
+            flex: 1;
+        }
+        
+        .mass-actions-group .btn-mass-toggle {
+            background: var(--cor-icone-principal); /* Verde para Marcar Todos */
+            color: var(--cor-secundaria);
+            font-weight: bold;
+        }
+
+        .mass-actions-group .btn-mass-toggle:hover {
+            background: #81c784; 
+        }
+
+        .toggle-all-group button {
+            background: #555;
+            color: var(--cor-texto);
+        }
+
+        .toggle-all-group button:hover {
+            background: #666;
+        }
+
+        /* Botão Limpar Comprados (ajustado para o novo grupo) */
+        .btn-limpar {
+            margin-top: 0; 
             background: var(--cor-perigo);
             color: var(--cor-texto);
         }
@@ -325,7 +359,7 @@
                 padding: 15px 12px;
             }
             
-            .tools-group {
+            .tools-group, .mass-actions-group, .toggle-all-group {
                  flex-direction: column;
             }
         }
@@ -358,7 +392,15 @@
 
         <div id="listaCategorias"></div>
 
-        <button class="btn-limpar" id="limparCompradosBtn">🗑️ Limpar comprados</button>
+        <div class="mass-actions-group"> 
+            <button class="btn-mass-toggle" data-toggle="comprado" id="marcarTodosBtn">✅ Marcar Todos como Comprados</button>
+            <button class="btn-limpar" id="limparCompradosBtn">🗑️ Limpar comprados</button>
+        </div>
+        
+        <div class="toggle-all-group">
+            <button id="expandirTodosBtn">▼ Expandir Todas</button>
+            <button id="ocultarTodosBtn">▲ Ocultar Todas</button>
+        </div>
         
         <div class="tools-group">
             <button id="exportBtn">📥 Exportar (.json)</button>
@@ -368,8 +410,6 @@
     </div>
 
 <script>
-    // [O SEU JAVASCRIPT COMPLETO PERMANECE AQUI, COM A LÓGICA DE PROGRAMAÇÃO]
-    
     // Constantes e Variáveis
     const LS_KEY = "listaCompras";
     const LS_KEY_EXPANSION = "categoriasExpanded"; 
@@ -397,6 +437,11 @@
     const limparCompradosBtn = document.getElementById("limparCompradosBtn");
     const exportBtn = document.getElementById("exportBtn");
     const importFile = document.getElementById("importFile");
+
+    // NOVO: Cache dos botões de Ação em Massa
+    const marcarTodosBtn = document.getElementById("marcarTodosBtn");
+    const expandirTodosBtn = document.getElementById("expandirTodosBtn");
+    const ocultarTodosBtn = document.getElementById("ocultarTodosBtn");
     
     // --- FUNÇÕES DE UTILIDADE ---
 
@@ -525,6 +570,71 @@
         salvarLista();
         renderizarLista();
     };
+    
+    // NOVO: Marcar/Desmarcar TODOS os itens (Global)
+    const marcarTodos = (estado) => {
+        const acao = estado ? "marcar como comprado" : "marcar como pendente";
+        if (!confirm(`Tem certeza que deseja ${acao} todos os itens da lista?`)) return;
+
+        let alterado = false;
+        for (const cat in categorias) {
+            categorias[cat] = categorias[cat].map(item => {
+                if (item.comprado !== estado) {
+                    alterado = true;
+                    return { ...item, comprado: estado };
+                }
+                return item;
+            });
+        }
+        
+        if (alterado) {
+            salvarLista();
+            renderizarLista();
+        } else {
+            alert(`Todos os itens já estão ${estado ? 'comprados' : 'pendentes'}.`);
+        }
+    };
+    
+    // NOVO: Marcar/Desmarcar TODOS os itens de uma categoria
+    const marcarTodosCategoria = (categoriaChave, estado = true) => {
+        if (!categorias[categoriaChave] || categorias[categoriaChave].length === 0) return;
+        
+        let alterado = false;
+        categorias[categoriaChave] = categorias[categoriaChave].map(item => {
+            if (item.comprado !== estado) {
+                alterado = true;
+                return { ...item, comprado: estado };
+            }
+            return item;
+        });
+
+        if(alterado) {
+            salvarLista();
+            renderizarLista();
+        }
+    };
+
+    // NOVO: Expandir/Ocultar TODAS as categorias
+    const toggleTodasCategorias = (expandir) => {
+        let alterado = false;
+        const todasCategorias = new Set(Object.keys(categorias));
+        CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).forEach(chave => todasCategorias.add(chave));
+        
+        todasCategorias.forEach(chave => {
+             if (estadoExpansao[chave] !== expandir) {
+                 estadoExpansao[chave] = expandir;
+                 alterado = true;
+             }
+        });
+        
+        if (alterado) {
+            salvarEstadoExpansao();
+            renderizarLista();
+        } else {
+            alert(`Todas as categorias já estão ${expandir ? 'expandidas' : 'ocultas'}.`);
+        }
+    };
+
 
     const setFiltro = (tipo) => {
         filtroAtual = tipo;
@@ -645,6 +755,7 @@
                     <h2 tabindex="0" role="button" aria-expanded="${isExpanded}" aria-controls="ul-${cat.replace(/\s/g, '-')}" class="titulo-categoria">
                         <span class="categoria-nome-display" contenteditable="true" data-field="categoria">${categoriaParaExibir}</span>
                         <div class="categoria-h2-acoes">
+                             <button class="btn-mass-toggle-cat" title="Marcar todos como comprados" aria-label="Marcar todos os itens de ${categoriaParaExibir} como comprados">✅</button>
                              <button class="btn-remove-cat" aria-label="Remover categoria ${categoriaParaExibir}">🗑️</button>
                              <span class="toggle-icon">${toggleIcon}</span>
                         </div>
@@ -756,7 +867,7 @@
             const catDiv = target.closest('.categoria');
 
             // 1. Lógica de Expansão/Compressão (CORRIGIDA)
-            if (h2 && !target.closest('.categoria-nome-display') && !target.classList.contains('btn-remove-cat')) {
+            if (h2 && !target.closest('.categoria-nome-display') && !target.classList.contains('btn-remove-cat') && !target.classList.contains('btn-mass-toggle-cat')) { 
                 const categoriaChave = catDiv.dataset.categoriaNome;
                 toggleCategoria(categoriaChave, h2);
                 return;
@@ -775,7 +886,14 @@
                 return;
             }
 
-            // 3. Ações do Item
+            // NOVO: 3. Marcar Todos da Categoria
+            if (target.classList.contains('btn-mass-toggle-cat')) {
+                const categoriaChave = catDiv.dataset.categoriaNome;
+                marcarTodosCategoria(categoriaChave, true); 
+                return;
+            }
+
+            // 4. Ações do Item
             if (li) {
                 const cat = li.dataset.categoria; 
                 const id = li.dataset.itemId;
@@ -815,8 +933,13 @@
     // Configuração Inicial dos Listeners Globais
     addItemForm.addEventListener('submit', adicionarItem);
     searchInput.addEventListener('input', renderizarLista);
-    limparCompradosBtn.addEventListener('click', limparComprados);
     
+    // NOVO/ATUALIZADO: Listeners para ações em massa
+    marcarTodosBtn.addEventListener('click', () => marcarTodos(true)); 
+    limparCompradosBtn.addEventListener('click', limparComprados);
+    expandirTodosBtn.addEventListener('click', () => toggleTodasCategorias(true)); 
+    ocultarTodosBtn.addEventListener('click', () => toggleTodasCategorias(false));
+
     filtroBotoes.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON' && e.target.dataset.filter) {
             setFiltro(e.target.dataset.filter);
@@ -826,7 +949,7 @@
     exportBtn.addEventListener('click', exportarLista);
     importFile.addEventListener('change', importarLista);
     
-// NOVO: Código para registar o Service Worker (PWA)
+// Código para registar o Service Worker (PWA)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     // ATENÇÃO: Corrigimos o caminho para incluir o nome do repositório
