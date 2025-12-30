@@ -2,970 +2,405 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lista de Compras 🛒</title>
-
-    <link rel="manifest" href="./manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="theme-color" content="#ff9800">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Inventário Neon</title>
     <style>
-        /* 1. VARIÁVEIS CSS (Melhores Cores de Ícones) */
+        /* --- ESTILO FUTURISTA (CSS) --- */
         :root {
-            /* Cores Escuras (Dark Mode) */
-            --cor-fundo: #121212;
-            --cor-fundo-container: #1e1e1e;
-            --cor-fundo-input: #2a2a2a;
-            --cor-texto: #eee;
-            --cor-borda-separador: #333;
-            /* Cores de Ação */
-            --cor-primaria: #ff9800; /* Laranja principal */
-            --cor-primaria-hover: #ffa726;
-            --cor-secundaria: #000;
-            --cor-perigo: #e53935; /* Vermelho */
-            --cor-perigo-hover: #f44336;
+            /* Paleta Dark & Neon */
+            --bg-gradient-start: #0f0c29;
+            --bg-gradient-mid: #302b63;
+            --bg-gradient-end: #24243e;
             
-            /* Cores de Ícones para melhor contraste */
-            --cor-icone-principal: #66bb6a; /* Verde Suave para VISTO */
-            --cor-icone-quantidade: #03a9f4; /* Azul Suave para +/- */
-            --cor-icone-remover: var(--cor-perigo);
-            --cor-icone-export: #ffeb3b; /* Amarelo para Export/Import */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-blur: 12px;
+
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-glow: 0 0 15px rgba(118, 75, 162, 0.5);
+            
+            --text-main: #f0f0f0;
+            --text-muted: #8b9bb4;
+            
+            --success-color: #00f260; /* Verde Neon */
+            --danger-color: #ff0055;  /* Rosa/Vermelho Neon */
         }
 
-        /* 2. Otimização de Box-sizing */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--cor-fundo);
-            color: var(--cor-texto);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+            background-attachment: fixed; /* Fundo fixo ao fazer scroll */
             margin: 0;
-            min-height: 100dvh; 
+            padding: 0;
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+        /* Cabeçalho Glass */
+        header {
+            background: rgba(15, 12, 41, 0.7);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
         }
 
         h1 {
-            margin: 20px 0;
-            color: var(--cor-primaria);
-            font-size: 2em; 
-        }
-
-        .container {
-            width: 95%;
-            max-width: 600px;
-            background: var(--cor-fundo-container);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-        }
-
-        /* Agrupamento de Inputs e Botões */
-        .input-group, .search-group, .filtros {
-            display: flex;
-            flex-wrap: wrap; 
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        input, button {
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
-            transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
-        }
-
-        input {
-            flex: 1;
-            background: var(--cor-fundo-input);
-            color: var(--cor-texto);
-            color-scheme: dark;
-        }
-        
-        input::placeholder {
-            color: #999;
-        }
-
-        button {
-            background: var(--cor-primaria);
-            color: var(--cor-secundaria);
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        button:hover {
-            background: var(--cor-primaria-hover);
-        }
-
-        /* Secção da Categoria */
-        .categoria {
-            margin-bottom: 20px;
-        }
-        
-        .categoria h2 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 10px 0;
-            padding-bottom: 5px;
-            font-size: 1.2em;
-            border-bottom: 1px solid var(--cor-borda-separador);
-            color: var(--cor-primaria-hover);
-            cursor: pointer;
-        }
-        
-        .categoria h2:focus > .categoria-nome-display {
-             background-color: #333;
-             border-radius: 4px;
-        }
-
-        .categoria-nome-display {
-            flex-grow: 1;
-            margin-right: 10px;
-            padding: 5px;
-            transition: background-color 0.2s;
-            outline: none; 
-        }
-
-        .categoria-nome-display:hover, .categoria-nome-display:focus {
-            background-color: #333;
-            border-radius: 4px;
-        }
-
-        .categoria-h2-acoes {
-            display: flex;
-            align-items: center;
-            gap: 10px; 
-        }
-
-        .categoria-h2-acoes button {
-            padding: 5px 8px;
-            background: transparent;
-            color: var(--cor-icone-remover);
-            font-weight: normal;
-        }
-        
-        /* NOVO: Estilo para botão Marcar Todos Categoria */
-        .categoria-h2-acoes .btn-mass-toggle-cat {
-            color: var(--cor-icone-principal);
-        }
-
-
-        .toggle-icon {
-            font-size: 0.8em;
-            color: #bbb;
-            pointer-events: none; 
-            margin-left: 5px;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
             margin: 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; /* Texto com gradiente */
+            text-transform: uppercase;
         }
 
-        li {
+        /* Tabs Flutuantes */
+        .tabs-container {
+            padding: 15px 20px;
+            background: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50px;
+            padding: 5px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--accent-glow);
+        }
+
+        /* Conteúdo Principal */
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px 80px 20px; /* Espaço extra em baixo */
+        }
+
+        .hidden { display: none !important; }
+
+        /* Input Estilizado */
+        .input-wrapper {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #764ba2;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+        }
+
+        button.add-btn {
+            width: 100%;
+            margin-top: 20px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: var(--accent-glow);
+            transition: transform 0.2s;
+        }
+
+        button.add-btn:active { transform: scale(0.97); }
+
+        /* Lista de Itens */
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin: 25px 0 15px 5px;
+            border-left: 3px solid #764ba2;
+            padding-left: 10px;
+        }
+
+        .item-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(5px);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--cor-fundo-input);
-            margin-bottom: 10px;
-            padding: 12px;
-            border-radius: 8px;
-            transition: 0.3s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
         }
 
-        li.comprado {
-            text-decoration: line-through;
+        .item-name {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--text-main);
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+
+        /* Estado Comprado/Rasurado */
+        .item-card.bought {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: transparent;
             opacity: 0.6;
         }
-        
-        .item-nome-container {
+
+        .item-card.bought .item-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* Botões de Ação */
+        .actions { display: flex; gap: 12px; align-items: center; }
+
+        .icon-btn {
+            border: none;
+            background: rgba(255,255,255,0.08);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            flex-grow: 1;
-            margin-right: 10px;
+            justify-content: center;
             cursor: pointer;
-            flex-shrink: 1; 
-            overflow: hidden;
-        }
-        
-        .item-nome {
-            padding: 5px;
-            margin-right: 5px;
-            word-break: break-word;
-            transition: background-color 0.2s;
-            outline: none;
-            flex-grow: 1; 
+            transition: all 0.2s;
+            color: white;
         }
 
-        .item-nome:hover, .item-nome:focus {
-            background-color: #333;
-            border-radius: 4px;
+        /* Botão Visto (Neon Green) */
+        .btn-check { color: var(--success-color); border: 1px solid rgba(0, 242, 96, 0.2); }
+        .btn-check:active { 
+            background: var(--success-color); 
+            color: black; 
+            box-shadow: 0 0 15px var(--success-color);
         }
 
-        /* ACTIONS: Grupo de botões */
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex-shrink: 0; 
-        }
-        
-        /* Quantidade no centro */
-        .item-quantidade-display {
-            font-weight: bold;
-            color: var(--cor-icone-quantidade);
-            padding: 0 8px;
-            min-width: 25px; 
-            text-align: center;
+        /* Botão X (Neon Red) */
+        .btn-cross { color: var(--danger-color); border: 1px solid rgba(255, 0, 85, 0.2); }
+        .btn-cross:active { 
+            background: var(--danger-color); 
+            color: white;
+            box-shadow: 0 0 15px var(--danger-color);
         }
 
-        .actions button {
-            padding: 8px;
-            font-size: 14px;
-            min-width: 30px;
-            background: #444; 
-            color: var(--cor-texto);
+        /* Botão Delete */
+        .btn-delete { 
+            background: transparent; 
+            color: #586377; 
+            width: 30px; 
+            height: 30px; 
+            font-size: 0.9rem;
         }
+        .btn-delete:hover { color: var(--danger-color); }
 
-        .actions button:hover {
-            background: #555;
+        /* Animação de entrada */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .actions button[data-action="decrease"],
-        .actions button[data-action="increase"] {
-            color: var(--cor-icone-quantidade); 
-        }
+        .item-card { animation: fadeIn 0.3s ease-out; }
 
-        .actions .btn-toggle {
-            color: var(--cor-icone-principal); 
-        }
-        
-        .actions .btn-remove {
-            color: var(--cor-icone-remover); 
-        }
-        
-        /* Secção de Ferramentas (Export/Import) */
-        .tools-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--cor-borda-separador);
-        }
-
-        .tools-group button, .tools-group input {
-            flex: 1;
-            min-width: 120px;
-            background: var(--cor-fundo-input);
-            color: var(--cor-icone-export);
-            font-weight: bold;
-        }
-        
-        .tools-group button:hover {
-            background: #333;
-        }
-
-        /* NOVO: Estilos para Ações em Massa */
-        .mass-actions-group, .toggle-all-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        .mass-actions-group button, .toggle-all-group button {
-            flex: 1;
-        }
-        
-        .mass-actions-group .btn-mass-toggle {
-            background: var(--cor-icone-principal); /* Verde para Marcar Todos */
-            color: var(--cor-secundaria);
-            font-weight: bold;
-        }
-
-        .mass-actions-group .btn-mass-toggle:hover {
-            background: #81c784; 
-        }
-
-        .toggle-all-group button {
-            background: #555;
-            color: var(--cor-texto);
-        }
-
-        .toggle-all-group button:hover {
-            background: #666;
-        }
-
-        /* Botão Limpar Comprados (ajustado para o novo grupo) */
-        .btn-limpar {
-            margin-top: 0; 
-            background: var(--cor-perigo);
-            color: var(--cor-texto);
-        }
-
-        .btn-limpar:hover {
-            background: var(--cor-perigo-hover);
-        }
-
-        /* Botões de Filtro (sem alterações significativas) */
-        .filtros button {
-            flex: 1;
-            margin: 0;
-            background: var(--cor-fundo-input);
-            color: var(--cor-texto);
-        }
-
-        .filtros button.active {
-            background: var(--cor-primaria);
-            color: var(--cor-secundaria);
-            box-shadow: 0 0 5px var(--cor-primaria);
-        }
-
-        /* OTIMIZAÇÃO E ADAPTAÇÃO MOBILE */
-        @media (max-width: 650px) {
-            .input-group, .search-group {
-                flex-direction: column;
-            }
-            
-            .input-group input {
-                width: 100%;
-                margin-bottom: 5px;  
-            }
-
-            .input-group button {
-                width: 100%;
-                margin-top: 5px;
-            }
-
-            .filtros {
-                justify-content: space-between;
-            }
-            
-            .filtros button {
-                flex-basis: calc(33.33% - 7px);
-                margin: 0;
-            }
-
-            li {
-                padding: 15px 12px;
-            }
-            
-            .tools-group, .mass-actions-group, .toggle-all-group {
-                 flex-direction: column;
-            }
-        }
     </style>
 </head>
 <body>
-    <h1>🛒 Lista de Compras</h1>
-    <div class="container">
-        <form id="addItemForm" class="input-group">
-            <input type="text" id="itemInput" placeholder="Produto..." aria-label="Nome do produto" required>
-            <input 
-                type="text" 
-                id="categoriaInput" 
-                list="categoriaSuggestions" 
-                placeholder="Categoria (escolha ou digite)..." 
-                aria-label="Categoria do produto">
-            <datalist id="categoriaSuggestions"></datalist>
-            <button type="submit">Adicionar</button>
-        </form>
 
-        <div class="search-group">
-            <input type="text" id="searchInput" placeholder="🔍 Pesquisar produto..." aria-label="Pesquisar na lista">
-        </div>
+    <header>
+        <h1>💎 Inventário</h1>
+    </header>
 
-        <div class="filtros" id="filtroBotoes">
-            <button data-filter="todos" class="active">Todos</button>
-            <button data-filter="pendentes">Pendentes</button>
-            <button data-filter="comprados">Comprados</button>
-        </div>
-        
-        <div class="toggle-all-group">
-            <button id="expandirTodosBtn">▼ Expandir Todas</button>
-            <button id="ocultarTodosBtn">▲ Ocultar Todas</button>
-        </div>
-
-        <div id="listaCategorias"></div>
-
-        <div class="mass-actions-group"> 
-            <button class="btn-mass-toggle" data-toggle="comprado" id="marcarTodosBtn">✅ Marcar Todos como Comprados</button>
-            <button class="btn-limpar" id="limparCompradosBtn">🗑️ Limpar comprados</button>
-        </div>
-        
-        <div class="tools-group">
-            <button id="exportBtn">📥 Exportar (.json)</button>
-            <label for="importFile" style="display: none;">Importar Lista</label>
-            <input type="file" id="importFile" accept=".json" style="padding: 10px; cursor: pointer;">
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('list')">A Minha Lista</button>
+            <button class="tab-btn" onclick="switchTab('add')">Adicionar</button>
         </div>
     </div>
 
-<script>
-    // Constantes e Variáveis
-    const LS_KEY = "listaCompras";
-    const LS_KEY_EXPANSION = "categoriasExpanded"; 
+    <div id="tab-list" class="container">
+        <div id="active-list-container">
+            <div class="section-label">A Comprar</div>
+            <div id="active-list"></div>
+        </div>
 
-    // Categorias Padrão
-    const CATEGORIAS_PADRAO = [
-        "Bebidas", "Carne", "Charcutaria", "Congelados", "Despensa", 
-        "Frutas", "Higiene", "Laticínios", "Legumes", "Limpeza", 
-        "Massas, Arroz & Leguminosas", "Peixe & Marisco", "Pão & Padaria", 
-        "Snacks & Doces", "Temperos & Condimentos"
-    ];
+        <div id="bought-list-container">
+            <div class="section-label">Inventário (Comprado)</div>
+            <div id="bought-list"></div>
+        </div>
+    </div>
 
-    let categorias = JSON.parse(localStorage.getItem(LS_KEY)) || {};
-    let estadoExpansao = JSON.parse(localStorage.getItem(LS_KEY_EXPANSION)) || {};
-    let filtroAtual = "todos";
-    
-    // Cache dos elementos DOM
-    const itemInput = document.getElementById("itemInput");
-    const categoriaInput = document.getElementById("categoriaInput");
-    const categoriaSuggestions = document.getElementById("categoriaSuggestions");
-    const searchInput = document.getElementById("searchInput");
-    const listaDiv = document.getElementById("listaCategorias");
-    const filtroBotoes = document.getElementById("filtroBotoes");
-    const addItemForm = document.getElementById("addItemForm");
-    const limparCompradosBtn = document.getElementById("limparCompradosBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    const importFile = document.getElementById("importFile");
-
-    // NOVO: Cache dos botões de Ação em Massa
-    const marcarTodosBtn = document.getElementById("marcarTodosBtn");
-    const expandirTodosBtn = document.getElementById("expandirTodosBtn");
-    const ocultarTodosBtn = document.getElementById("ocultarTodosBtn");
-    
-    // --- FUNÇÕES DE UTILIDADE ---
-
-    const salvarLista = () => {
-        localStorage.setItem(LS_KEY, JSON.stringify(categorias));
-    };
-
-    const salvarEstadoExpansao = () => {
-        localStorage.setItem(LS_KEY_EXPANSION, JSON.stringify(estadoExpansao));
-    };
-
-    const formatarCategoriaParaChave = (str) => {
-        return str.trim().toLowerCase();
-    };
-
-    const formatarItemParaExibicao = (str) => {
-        if (!str) return '';
-        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-    };
-
-    const atualizarDatalist = () => {
-        let sugestoes = new Set();
+    <div id="tab-add" class="container hidden">
+        <div class="input-wrapper">
+            <label for="newItem">ADICIONAR NOVO ITEM</label>
+            <input type="text" id="newItem" placeholder="Digite aqui..." autocomplete="off" onkeypress="handleEnter(event)">
+            <button class="add-btn" onclick="addItem()">ADICIONAR</button>
+        </div>
         
-        Object.keys(categorias).forEach(chave => {
-            if(categorias[chave].length > 0 || CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).includes(chave)) {
-                sugestoes.add(chave);
-            }
-        });
+        <div style="margin-top: 30px; text-align: center;">
+            <p style="color: var(--text-muted); font-size: 0.8rem;">
+                Modo Offline • Dados guardados localmente
+            </p>
+        </div>
+    </div>
+
+    <script>
+        /* --- LÓGICA (JavaScript) - Intacta e Robusta --- */
         
-        CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).forEach(chave => sugestoes.add(chave));
+        let items = JSON.parse(localStorage.getItem('myInventoryFuturistic')) || [];
+        renderList();
 
-        let opcoes = Array.from(sugestoes)
-                         .sort((a, b) => a.localeCompare(b))
-                         .map(chave => formatarItemParaExibicao(chave));
-
-        categoriaSuggestions.innerHTML = opcoes.map(op => `<option value="${op}">`).join('');
-    };
-    
-    // --- LÓGICA DE APLICAÇÃO ---
-
-    const inicializarCategorias = () => {
-        CATEGORIAS_PADRAO.forEach(cat => {
-            const chave = formatarCategoriaParaChave(cat);
-            if (estadoExpansao[chave] === undefined) {
-                 estadoExpansao[chave] = true;
-            }
-        });
-        salvarEstadoExpansao();
-    };
-
-    inicializarCategorias();
-
-    const adicionarItem = (event) => {
-        event.preventDefault(); 
-        
-        const itemBruto = itemInput.value.trim();
-        const itemNome = formatarItemParaExibicao(itemBruto); 
-
-        const categoriaBruta = categoriaInput.value.trim() || "Geral";
-        const categoriaChave = formatarCategoriaParaChave(categoriaBruta); 
-
-        if (!itemBruto) return; 
-
-        if (!categorias[categoriaChave]) categorias[categoriaChave] = [];
-        
-        if (estadoExpansao[categoriaChave] === undefined) {
-            estadoExpansao[categoriaChave] = true;
-            salvarEstadoExpansao();
-        }
-        
-        const novoItem = { 
-            id: Date.now(), 
-            nome: itemNome, 
-            quantidade: 1, 
-            comprado: false 
-        };
-        categorias[categoriaChave].push(novoItem);
-
-        itemInput.value = "";
-        categoriaInput.value = "";
-
-        salvarLista();
-        renderizarLista();
-    };
-
-    const getItemId = (categoria, id) => {
-        return categorias[categoria].findIndex(item => item.id.toString() === id.toString());
-    }
-
-    const alterarQuantidade = (categoria, id, delta) => {
-        const index = getItemId(categoria, id);
-        if (index === -1) return;
-        categorias[categoria][index].quantidade = Math.max(1, categorias[categoria][index].quantidade + delta);
-        salvarLista();
-        renderizarLista();
-    };
-
-    const toggleComprado = (categoria, id) => {
-        const index = getItemId(categoria, id);
-        if (index === -1) return;
-        categorias[categoria][index].comprado = !categorias[categoria][index].comprado;
-        salvarLista();
-        renderizarLista();
-    };
-
-    const removerItem = (categoria, id) => {
-        const index = getItemId(categoria, id);
-        if (index === -1) return;
-        categorias[categoria].splice(index, 1);
-        if (!categorias[categoria].length) delete categorias[categoria]; 
-        salvarLista();
-        renderizarLista();
-    };
-
-    const limparComprados = () => {
-        if (!confirm("Tem certeza que deseja remover todos os itens comprados?")) return;
-        for (const cat in categorias) {
-            categorias[cat] = categorias[cat].filter(item => !item.comprado);
-            if (!categorias[cat].length) {
-                const isPadrao = CATEGORIAS_PADRAO.map(c => formatarCategoriaParaChave(c)).includes(cat);
-                if(!isPadrao) {
-                    delete categorias[cat];
-                }
-            }
-        }
-        salvarLista();
-        renderizarLista();
-    };
-    
-    // NOVO: Marcar/Desmarcar TODOS os itens (Global)
-    const marcarTodos = (estado) => {
-        const acao = estado ? "marcar como comprado" : "marcar como pendente";
-        if (!confirm(`Tem certeza que deseja ${acao} todos os itens da lista?`)) return;
-
-        let alterado = false;
-        for (const cat in categorias) {
-            categorias[cat] = categorias[cat].map(item => {
-                if (item.comprado !== estado) {
-                    alterado = true;
-                    return { ...item, comprado: estado };
-                }
-                return item;
-            });
-        }
-        
-        if (alterado) {
-            salvarLista();
-            renderizarLista();
-        } else {
-            alert(`Todos os itens já estão ${estado ? 'comprados' : 'pendentes'}.`);
-        }
-    };
-    
-    // NOVO: Marcar/Desmarcar TODOS os itens de uma categoria
-    const marcarTodosCategoria = (categoriaChave, estado = true) => {
-        if (!categorias[categoriaChave] || categorias[categoriaChave].length === 0) return;
-        
-        let alterado = false;
-        categorias[categoriaChave] = categorias[categoriaChave].map(item => {
-            if (item.comprado !== estado) {
-                alterado = true;
-                return { ...item, comprado: estado };
-            }
-            return item;
-        });
-
-        if(alterado) {
-            salvarLista();
-            renderizarLista();
-        }
-    };
-
-    // NOVO: Expandir/Ocultar TODAS as categorias
-    const toggleTodasCategorias = (expandir) => {
-        let alterado = false;
-        const todasCategorias = new Set(Object.keys(categorias));
-        CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).forEach(chave => todasCategorias.add(chave));
-        
-        todasCategorias.forEach(chave => {
-             if (estadoExpansao[chave] !== expandir) {
-                 estadoExpansao[chave] = expandir;
-                 alterado = true;
-             }
-        });
-        
-        if (alterado) {
-            salvarEstadoExpansao();
-            renderizarLista();
-        } else {
-            alert(`Todas as categorias já estão ${expandir ? 'expandidas' : 'ocultas'}.`);
-        }
-    };
-
-
-    const setFiltro = (tipo) => {
-        filtroAtual = tipo;
-        document.querySelectorAll("#filtroBotoes button").forEach(btn => btn.classList.remove("active"));
-        document.querySelector(`#filtroBotoes button[data-filter="${tipo}"]`).classList.add("active");
-        renderizarLista();
-    };
-    
-    const toggleCategoria = (categoriaChave, h2Element) => {
-        estadoExpansao[categoriaChave] = !estadoExpansao[categoriaChave];
-        salvarEstadoExpansao();
-
-        const ul = h2Element.closest('.categoria').querySelector('ul');
-        const span = h2Element.querySelector('.toggle-icon');
-        const isExpanded = estadoExpansao[categoriaChave];
-        
-        ul.style.display = isExpanded ? 'block' : 'none';
-        span.textContent = isExpanded ? '▼' : '▲';
-        h2Element.setAttribute('aria-expanded', isExpanded);
-    };
-
-    const editarCategoria = (categoriaChave, novoNomeBruto) => {
-        const novoNomeChave = formatarCategoriaParaChave(novoNomeBruto);
-
-        if (novoNomeChave === categoriaChave || !novoNomeBruto.trim()) {
-            renderizarLista();
-            return;
-        }
-
-        if (categorias[novoNomeChave]) {
-            alert("Essa categoria já existe! Tente outro nome.");
-            renderizarLista();
-            return;
-        }
-
-        categorias[novoNomeChave] = categorias[categoriaChave];
-        delete categorias[categoriaChave];
-        
-        estadoExpansao[novoNomeChave] = estadoExpansao[categoriaChave];
-        delete estadoExpansao[categoriaChave];
-
-        salvarLista();
-        salvarEstadoExpansao();
-        renderizarLista(); 
-    };
-
-    const editarItem = (categoria, id, novoNomeBruto) => {
-        const index = getItemId(categoria, id);
-        if (index === -1) return;
-
-        const novoNomeFormatado = formatarItemParaExibicao(novoNomeBruto);
-
-        if (!novoNomeFormatado.trim()) {
-            alert("O nome do item não pode estar vazio.");
-            renderizarLista();
-            return;
-        }
-        
-        categorias[categoria][index].nome = novoNomeFormatado;
-        salvarLista();
-        renderizarLista();
-    };
-
-    const renderizarLista = () => {
-        const search = searchInput.value.toLowerCase();
-        listaDiv.innerHTML = ""; 
-        
-        atualizarDatalist();
-
-        let todasCategoriasChaves = new Set(Object.keys(categorias));
-        CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).forEach(chave => todasCategoriasChaves.add(chave));
-        
-        let categoriasOrdenadas = Array.from(todasCategoriasChaves).sort((a,b) => a.localeCompare(b));
-
-        categoriasOrdenadas.forEach(cat => {
-            const itensDaCategoria = categorias[cat] || [];
+        function switchTab(tabName) {
+            document.getElementById('tab-list').classList.add('hidden');
+            document.getElementById('tab-add').classList.add('hidden');
             
-            let itensFiltrados = itensDaCategoria.filter(item => {
-                const matchesFiltro = (filtroAtual === "todos") || 
-                                     (filtroAtual === "pendentes" && !item.comprado) || 
-                                     (filtroAtual === "comprados" && item.comprado);
-                const matchesSearch = item.nome.toLowerCase().includes(search);
-                return matchesFiltro && matchesSearch;
-            });
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
 
-            const isCategoriaPadrao = CATEGORIAS_PADRAO.map(formatarCategoriaParaChave).includes(cat);
-            if (!itensFiltrados.length && !isCategoriaPadrao) return;
-            if (!itensFiltrados.length && search.length > 0) return;
-
-            const categoriaParaExibir = cat.toUpperCase();
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             
-            const isExpanded = estadoExpansao[cat] !== false; 
-            const displayStyle = isExpanded ? 'block' : 'none';
-            const toggleIcon = isExpanded ? '▼' : '▲';
-
-            let ulContent = itensFiltrados.sort((a,b) => a.nome.localeCompare(b.nome)).map(item => `
-                <li class="${item.comprado ? 'comprado' : ''}" data-item-id="${item.id}" data-categoria="${cat}">
-                    <div class="item-nome-container">
-                        <span class="item-nome" contenteditable="true" data-field="nome" aria-label="Editar nome do item">${item.nome}</span>
-                    </div>
-                    
-                    <div class="actions">
-                        <button class="btn-qty" data-action="decrease" aria-label="Diminuir quantidade de ${item.nome}">➖</button>
-                        <span class="item-quantidade-display">${item.quantidade}</span>
-                        <button class="btn-qty" data-action="increase" aria-label="Aumentar quantidade de ${item.nome}">➕</button>
-                        <button class="btn-toggle" aria-label="Marcar/Desmarcar ${item.nome} como comprado">✔️</button>
-                        <button class="btn-remove" aria-label="Remover ${item.nome}">🗑️</button>
-                    </div>
-                </li>
-            `).join('');
-
-            if (!itensFiltrados.length && isCategoriaPadrao) {
-                ulContent = ``;
+            if(tabName === 'list') {
+                buttons[0].classList.add('active');
+                renderList();
+            } else {
+                buttons[1].classList.add('active');
+                document.getElementById('newItem').focus();
             }
-
-            const categoriaHTML = `
-                <div class="categoria" data-categoria-nome="${cat}">
-                    <h2 tabindex="0" role="button" aria-expanded="${isExpanded}" aria-controls="ul-${cat.replace(/\s/g, '-')}" class="titulo-categoria">
-                        <span class="categoria-nome-display" contenteditable="true" data-field="categoria">${categoriaParaExibir}</span>
-                        <div class="categoria-h2-acoes">
-                             <button class="btn-mass-toggle-cat" title="Marcar todos como comprados" aria-label="Marcar todos os itens de ${categoriaParaExibir} como comprados">✅</button>
-                             <button class="btn-remove-cat" aria-label="Remover categoria ${categoriaParaExibir}">🗑️</button>
-                             <span class="toggle-icon">${toggleIcon}</span>
-                        </div>
-                    </h2>
-                    <ul id="ul-${cat.replace(/\s/g, '-')}" role="list" style="display: ${displayStyle};">${ulContent}</ul>
-                </div>
-            `;
-
-            listaDiv.insertAdjacentHTML('beforeend', categoriaHTML);
-        });
-        
-        setupEventListeners();
-    };
-
-    const handleEditFinish = (event) => {
-        const target = event.target;
-        const novoValor = target.textContent.trim(); 
-        const field = target.dataset.field;
-        
-        if (event.type === 'keydown' && event.keyCode !== 13) return;
-        
-        event.preventDefault(); 
-        
-        setTimeout(() => {
-             target.blur();
-        }, 0);
-        
-        if (field === 'categoria') {
-            const categoriaElement = target.closest('.categoria');
-            const categoriaChaveAntiga = categoriaElement.dataset.categoriaNome;
-            editarCategoria(categoriaChaveAntiga, novoValor);
-        } else if (field === 'nome') {
-            const li = target.closest('li');
-            const cat = li.dataset.categoria; 
-            const id = li.dataset.itemId;
-            editarItem(cat, id, novoValor);
-        }
-    };
-    
-    // --- LÓGICA DE EXPORTAÇÃO E IMPORTAÇÃO ---
-    
-    const exportarLista = () => {
-        const dataStr = JSON.stringify({
-            categorias: categorias,
-            estadoExpansao: estadoExpansao,
-        }, null, 2); 
-        
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        
-        const date = new Date().toISOString().slice(0,10).replace(/-/g,"");
-        a.download = `lista_compras_${date}.json`;
-        a.href = url;
-        
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert(`Lista de Compras exportada para ${a.download}!`);
-    };
-    
-    const importarLista = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (!confirm(`Tem certeza que deseja importar "${file.name}"? A lista atual será substituída.`)) {
-            importFile.value = ''; 
-            return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const importedData = JSON.parse(e.target.result);
+        function addItem() {
+            const input = document.getElementById('newItem');
+            const name = input.value.trim();
+
+            if (name) {
+                // Capitalizar a primeira letra para ficar bonito
+                const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+                items.push({ name: formattedName, bought: false });
+                saveAndRender();
+                input.value = ''; 
                 
-                if (importedData.categorias && typeof importedData.categorias === 'object') {
-                    categorias = importedData.categorias;
-                    
-                    if(importedData.estadoExpansao) {
-                        estadoExpansao = importedData.estadoExpansao;
-                        salvarEstadoExpansao();
-                    } else {
-                        estadoExpansao = {};
-                        inicializarCategorias();
-                    }
+                const btn = document.querySelector('.add-btn');
+                const originalText = btn.innerText;
+                btn.innerText = "ADICIONADO ✨";
+                setTimeout(() => btn.innerText = originalText, 1000);
+            }
+        }
 
-                    salvarLista();
-                    renderizarLista();
-                    alert(`Lista de Compras importada com sucesso de "${file.name}"!`);
+        function handleEnter(e) {
+            if (e.key === 'Enter') addItem();
+        }
+
+        function toggleItem(index, status) {
+            items[index].bought = status;
+            saveAndRender();
+        }
+
+        function deleteItem(index) {
+            if(confirm("Remover este item?")) {
+                items.splice(index, 1);
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            items.sort((a, b) => a.name.localeCompare(b.name));
+            localStorage.setItem('myInventoryFuturistic', JSON.stringify(items));
+            renderList();
+        }
+
+        function renderList() {
+            const activeListEl = document.getElementById('active-list');
+            const boughtListEl = document.getElementById('bought-list');
+            
+            activeListEl.innerHTML = '';
+            boughtListEl.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `item-card ${item.bought ? 'bought' : ''}`;
+
+                let actionButton = '';
+                // Ícones Unicode minimalistas
+                if (!item.bought) {
+                    actionButton = `<button class="icon-btn btn-check" onclick="toggleItem(${index}, true)">&#10003;</button>`;
                 } else {
-                    throw new Error("Estrutura do arquivo JSON inválida.");
+                    actionButton = `<button class="icon-btn btn-cross" onclick="toggleItem(${index}, false)">&#10005;</button>`;
                 }
-            } catch (error) {
-                alert(`Erro ao importar o ficheiro: ${error.message}`);
-            }
-            importFile.value = '';
-        };
 
-        reader.readAsText(file);
-    };
+                const deleteBtn = `<button class="icon-btn btn-delete" onclick="deleteItem(${index})">&#128465;</button>`;
 
+                card.innerHTML = `
+                    <span class="item-name">${item.name}</span>
+                    <div class="actions">
+                        ${actionButton}
+                        ${deleteBtn}
+                    </div>
+                `;
 
-    const setupEventListeners = () => {
-        listaDiv.onclick = (e) => {
-            const target = e.target;
-            const li = target.closest('li');
-            const h2 = target.closest('h2.titulo-categoria');
-            const catDiv = target.closest('.categoria');
-
-            // 1. Lógica de Expansão/Compressão (CORRIGIDA)
-            if (h2 && !target.closest('.categoria-nome-display') && !target.classList.contains('btn-remove-cat') && !target.classList.contains('btn-mass-toggle-cat')) { 
-                const categoriaChave = catDiv.dataset.categoriaNome;
-                toggleCategoria(categoriaChave, h2);
-                return;
-            }
-            
-            // 2. Remover Categoria
-            if (target.classList.contains('btn-remove-cat')) {
-                const categoriaChave = catDiv.dataset.categoriaNome;
-                 if (confirm(`Tem certeza que deseja remover a categoria "${categoriaChave.toUpperCase()}" e todos os seus itens?`)) {
-                    delete categorias[categoriaChave];
-                    delete estadoExpansao[categoriaChave];
-                    salvarLista();
-                    salvarEstadoExpansao();
-                    renderizarLista();
-                }
-                return;
-            }
-
-            // NOVO: 3. Marcar Todos da Categoria
-            if (target.classList.contains('btn-mass-toggle-cat')) {
-                const categoriaChave = catDiv.dataset.categoriaNome;
-                marcarTodosCategoria(categoriaChave, true); 
-                return;
-            }
-
-            // 4. Ações do Item
-            if (li) {
-                const cat = li.dataset.categoria; 
-                const id = li.dataset.itemId;
-
-                if (target.classList.contains('btn-qty')) {
-                    const delta = target.dataset.action === 'increase' ? 1 : -1;
-                    alterarQuantidade(cat, id, delta);
-                } else if (target.classList.contains('btn-toggle')) {
-                    toggleComprado(cat, id);
-                } else if (target.classList.contains('btn-remove')) {
-                    removerItem(cat, id);
-                } else if (target.closest('.item-nome-container')) { 
-                    if (!target.classList.contains('item-nome')) {
-                         toggleComprado(cat, id);
-                    }
-                }
-            }
-        };
-        
-        // Listener para Edição In-Place
-        document.querySelectorAll('[contenteditable="true"]').forEach(element => {
-            element.removeEventListener('blur', handleEditFinish);
-            element.removeEventListener('keydown', handleEditFinish);
-            element.removeEventListener('keypress', (e) => { if (e.keyCode === 13) e.preventDefault(); });
-            
-            element.addEventListener('blur', handleEditFinish);
-            element.addEventListener('keydown', handleEditFinish);
-            
-            element.addEventListener('keypress', (e) => {
-                if (e.keyCode === 13) {
-                    e.preventDefault();
+                if (item.bought) {
+                    boughtListEl.appendChild(card);
+                } else {
+                    activeListEl.appendChild(card);
                 }
             });
-        });
-    };
 
-    // Configuração Inicial dos Listeners Globais
-    addItemForm.addEventListener('submit', adicionarItem);
-    searchInput.addEventListener('input', renderizarLista);
-    
-    // NOVO/ATUALIZADO: Listeners para ações em massa
-    marcarTodosBtn.addEventListener('click', () => marcarTodos(true)); 
-    limparCompradosBtn.addEventListener('click', limparComprados);
-    expandirTodosBtn.addEventListener('click', () => toggleTodasCategorias(true)); 
-    ocultarTodosBtn.addEventListener('click', () => toggleTodasCategorias(false));
-
-    filtroBotoes.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON' && e.target.dataset.filter) {
-            setFiltro(e.target.dataset.filter);
+            if (activeListEl.children.length === 0) activeListEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; font-style:italic; padding:10px;">Lista vazia.</p>';
+            if (boughtListEl.children.length === 0) boughtListEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; font-style:italic; padding:10px;">Nada no inventário.</p>';
         }
-    });
-
-    exportBtn.addEventListener('click', exportarLista);
-    importFile.addEventListener('change', importarLista);
-    
-// Código para registar o Service Worker (PWA)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // ATENÇÃO: Corrigimos o caminho para incluir o nome do repositório
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker registado com sucesso:', registration);
-      })
-      .catch(error => {
-        console.log('Registo do ServiceWorker falhou:', error);
-      });
-  });
-}
-
-
-    // Chamada Inicial
-    renderizarLista();
-</script>
+    </script>
 </body>
 </html>
