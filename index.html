@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Inventário Neon</title>
     <style>
-        /* --- ESTILO FUTURISTA (CSS) --- */
+        /* --- ESTILO (CSS) --- */
         :root {
-            /* Paleta Dark & Neon */
             --bg-gradient-start: #0f0c29;
             --bg-gradient-mid: #302b63;
             --bg-gradient-end: #24243e;
@@ -22,8 +21,10 @@
             --text-main: #f0f0f0;
             --text-muted: #8b9bb4;
             
+            /* Cores de Ação */
             --success-color: #00f260; /* Verde Neon */
-            --danger-color: #ff0055;  /* Rosa/Vermelho Neon */
+            --danger-color: #ff0055;  /* Vermelho Neon */
+            --restore-color: #00d2ff; /* Ciano Neon (Para o botão de voltar) */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -42,13 +43,13 @@
         }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
         /* Cabeçalho */
         header {
-            background: rgba(15, 12, 41, 0.7);
+            background: rgba(15, 12, 41, 0.85);
             backdrop-filter: blur(var(--glass-blur));
             padding: 20px;
             text-align: center;
@@ -60,7 +61,7 @@
             margin: 0;
             font-size: 1.4rem;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -68,13 +69,13 @@
         }
 
         /* Tabs */
-        .tabs-container { padding: 15px 20px; background: transparent; }
+        .tabs-container { padding: 15px 20px; }
 
         .tabs {
             display: flex;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 50px;
-            padding: 5px;
+            padding: 4px;
             border: 1px solid var(--glass-border);
         }
 
@@ -97,7 +98,7 @@
             box-shadow: var(--accent-glow);
         }
 
-        /* Conteúdo Principal */
+        /* Conteúdo */
         .container {
             flex: 1;
             overflow-y: auto;
@@ -121,14 +122,15 @@
             display: block;
             margin-bottom: 10px;
             color: var(--text-muted);
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         input[type="text"] {
             width: 100%;
             padding: 16px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             color: white;
@@ -139,8 +141,8 @@
 
         input[type="text"]:focus {
             border-color: #764ba2;
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(118, 75, 162, 0.3);
         }
 
         button.add-btn {
@@ -158,7 +160,7 @@
             transition: transform 0.2s;
         }
 
-        button.add-btn:active { transform: scale(0.97); }
+        button.add-btn:active { transform: scale(0.98); }
 
         /* Lista */
         .section-label {
@@ -174,7 +176,7 @@
         .item-card {
             background: var(--glass-bg);
             backdrop-filter: blur(5px);
-            padding: 12px 16px; /* Ajuste ligeiro padding */
+            padding: 12px 16px;
             margin-bottom: 12px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
@@ -185,18 +187,16 @@
         }
 
         .item-name {
-            font-size: 1.05rem;
-            font-weight: 500;
+            font-size: 1.1rem;
             color: var(--text-main);
             flex-grow: 1;
-            padding-right: 10px;
-            word-break: break-word; /* Prevenir texto a sair do ecrã */
+            padding-right: 15px;
         }
 
         .item-card.bought {
             background: rgba(0, 0, 0, 0.2);
             border-color: transparent;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         .item-card.bought .item-name {
@@ -204,67 +204,61 @@
             color: var(--text-muted);
         }
 
-        /* Botões de Ação */
+        /* --- BOTÕES SIMÉTRICOS --- */
         .actions { display: flex; gap: 10px; align-items: center; }
 
         .icon-btn {
-            border: none;
-            width: 42px;
-            height: 42px;
+            border: 1px solid transparent;
+            width: 44px; /* Tamanho fixo e igual */
+            height: 44px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 1.1rem; /* Icones mais legiveis */
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.05); /* Fundo base igual */
         }
 
-        /* Botão Visto */
+        /* Visto (Check) */
         .btn-check { 
-            background: rgba(255,255,255,0.08);
             color: var(--success-color); 
-            border: 1px solid rgba(0, 242, 96, 0.2); 
+            border-color: rgba(0, 242, 96, 0.2); 
         }
         .btn-check:active { 
-            background: var(--success-color); 
-            color: black; 
+            background: var(--success-color); color: #000; 
             box-shadow: 0 0 15px var(--success-color);
         }
 
-        /* Botão X */
-        .btn-cross { 
-            background: rgba(255,255,255,0.08);
-            color: var(--danger-color); 
-            border: 1px solid rgba(255, 0, 85, 0.2); 
+        /* Restaurar (Undo) */
+        .btn-restore { 
+            color: var(--restore-color); 
+            border-color: rgba(0, 210, 255, 0.2); 
         }
-        .btn-cross:active { 
-            background: var(--danger-color); 
-            color: white;
-            box-shadow: 0 0 15px var(--danger-color);
+        .btn-restore:active { 
+            background: var(--restore-color); color: #000;
+            box-shadow: 0 0 15px var(--restore-color);
         }
 
-        /* Botão LIXEIRA (CORRIGIDO) */
+        /* Apagar (X) */
         .btn-delete { 
-            /* Fundo subtil avermelhado para indicar função */
-            background: rgba(255, 0, 85, 0.15); 
-            /* Texto claro (rosa claro) para alto contraste */
-            color: #ffb3c6; 
-            border: 1px solid rgba(255, 0, 85, 0.3);
+            color: var(--danger-color);
+            border-color: rgba(255, 0, 85, 0.2);
         }
         
         .btn-delete:active {
             background: var(--danger-color);
             color: white;
-            box-shadow: 0 0 20px var(--danger-color);
-            transform: scale(0.95);
+            box-shadow: 0 0 15px var(--danger-color);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        /* Animação */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .item-card { animation: fadeIn 0.3s ease-out; }
+        .item-card { animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
     </style>
 </head>
@@ -276,7 +270,7 @@
 
     <div class="tabs-container">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('list')">A Minha Lista</button>
+            <button class="tab-btn active" onclick="switchTab('list')">Lista</button>
             <button class="tab-btn" onclick="switchTab('add')">Adicionar</button>
         </div>
     </div>
@@ -288,29 +282,31 @@
         </div>
 
         <div id="bought-list-container">
-            <div class="section-label">Inventário (Comprado)</div>
+            <div class="section-label">Guardado / Comprado</div>
             <div id="bought-list"></div>
         </div>
     </div>
 
     <div id="tab-add" class="container hidden">
         <div class="input-wrapper">
-            <label for="newItem">ADICIONAR NOVO ITEM</label>
-            <input type="text" id="newItem" placeholder="Digite aqui..." autocomplete="off" onkeypress="handleEnter(event)">
-            <button class="add-btn" onclick="addItem()">ADICIONAR</button>
+            <label for="newItem">Novo Item</label>
+            <input type="text" id="newItem" placeholder="O que está a faltar?" autocomplete="off" onkeypress="handleEnter(event)">
+            <button class="add-btn" onclick="addItem()">Adicionar à Lista</button>
         </div>
         
-        <div style="margin-top: 30px; text-align: center;">
-            <p style="color: var(--text-muted); font-size: 0.8rem;">
-                Modo Offline • Dados guardados localmente
-            </p>
+        <div style="margin-top: 40px; text-align: center; opacity: 0.4;">
+            <p style="font-size: 0.75rem;">OFFLINE DATABASE</p>
         </div>
     </div>
 
     <script>
-        /* --- LÓGICA (JavaScript) --- */
+        /* --- JAVASCRIPT --- */
         
-        let items = JSON.parse(localStorage.getItem('myInventoryFuturistic')) || [];
+        // Chave do localStorage
+        const DB_KEY = 'myInventorySymmetric';
+        let items = JSON.parse(localStorage.getItem(DB_KEY)) || [];
+        
+        // Inicializar
         renderList();
 
         function switchTab(tabName) {
@@ -343,14 +339,12 @@
                 
                 const btn = document.querySelector('.add-btn');
                 const originalText = btn.innerText;
-                btn.innerText = "ADICIONADO ✨";
+                btn.innerText = "ADICIONADO";
                 setTimeout(() => btn.innerText = originalText, 1000);
             }
         }
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') addItem();
-        }
+        function handleEnter(e) { if (e.key === 'Enter') addItem(); }
 
         function toggleItem(index, status) {
             items[index].bought = status;
@@ -358,7 +352,10 @@
         }
 
         function deleteItem(index) {
-            if(confirm("Remover este item?")) {
+            // Vibração para feedback tátil (se o telemóvel suportar)
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            if(confirm("Eliminar este item para sempre?")) {
                 items.splice(index, 1);
                 saveAndRender();
             }
@@ -366,7 +363,7 @@
 
         function saveAndRender() {
             items.sort((a, b) => a.name.localeCompare(b.name));
-            localStorage.setItem('myInventoryFuturistic', JSON.stringify(items));
+            localStorage.setItem(DB_KEY, JSON.stringify(items));
             renderList();
         }
 
@@ -382,16 +379,20 @@
                 card.className = `item-card ${item.bought ? 'bought' : ''}`;
 
                 let actionButton = '';
+                
                 if (!item.bought) {
-                    // Check
+                    // Botão CHECK (Verde) para itens a comprar
+                    // Unicode: Check Mark
                     actionButton = `<button class="icon-btn btn-check" onclick="toggleItem(${index}, true)">&#10003;</button>`;
                 } else {
-                    // X
-                    actionButton = `<button class="icon-btn btn-cross" onclick="toggleItem(${index}, false)">&#10005;</button>`;
+                    // Botão RESTORE (Ciano) para itens comprados
+                    // Unicode: Arrow Counter Clockwise
+                    actionButton = `<button class="icon-btn btn-restore" onclick="toggleItem(${index}, false)">&#8634;</button>`;
                 }
 
-                // LIXO (Agora com a classe corrigida)
-                const deleteBtn = `<button class="icon-btn btn-delete" onclick="deleteItem(${index})">&#128465;</button>`;
+                // Botão DELETE (X Vermelho) igual para todos
+                // Unicode: Multiplication X
+                const deleteBtn = `<button class="icon-btn btn-delete" onclick="deleteItem(${index})">&#10005;</button>`;
 
                 card.innerHTML = `
                     <span class="item-name">${item.name}</span>
@@ -408,8 +409,8 @@
                 }
             });
 
-            if (activeListEl.children.length === 0) activeListEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; font-style:italic; padding:10px;">Lista vazia.</p>';
-            if (boughtListEl.children.length === 0) boughtListEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; font-style:italic; padding:10px;">Nada no inventário.</p>';
+            if (activeListEl.children.length === 0) activeListEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); opacity:0.5">--- Vazio ---</div>';
+            if (boughtListEl.children.length === 0) boughtListEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); opacity:0.5">--- Vazio ---</div>';
         }
     </script>
 </body>
