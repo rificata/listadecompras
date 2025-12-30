@@ -31,7 +31,7 @@
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
-            background-attachment: fixed; /* Fundo fixo ao fazer scroll */
+            background-attachment: fixed;
             margin: 0;
             padding: 0;
             color: var(--text-main);
@@ -41,12 +41,12 @@
             overflow: hidden;
         }
 
-        /* Scrollbar personalizada */
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
 
-        /* Cabeçalho Glass */
+        /* Cabeçalho */
         header {
             background: rgba(15, 12, 41, 0.7);
             backdrop-filter: blur(var(--glass-blur));
@@ -63,15 +63,12 @@
             letter-spacing: 1px;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent; /* Texto com gradiente */
+            -webkit-text-fill-color: transparent;
             text-transform: uppercase;
         }
 
-        /* Tabs Flutuantes */
-        .tabs-container {
-            padding: 15px 20px;
-            background: transparent;
-        }
+        /* Tabs */
+        .tabs-container { padding: 15px 20px; background: transparent; }
 
         .tabs {
             display: flex;
@@ -104,12 +101,12 @@
         .container {
             flex: 1;
             overflow-y: auto;
-            padding: 10px 20px 80px 20px; /* Espaço extra em baixo */
+            padding: 10px 20px 80px 20px;
         }
 
         .hidden { display: none !important; }
 
-        /* Input Estilizado */
+        /* Input */
         .input-wrapper {
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur));
@@ -163,7 +160,7 @@
 
         button.add-btn:active { transform: scale(0.97); }
 
-        /* Lista de Itens */
+        /* Lista */
         .section-label {
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -177,7 +174,7 @@
         .item-card {
             background: var(--glass-bg);
             backdrop-filter: blur(5px);
-            padding: 16px;
+            padding: 12px 16px; /* Ajuste ligeiro padding */
             margin-bottom: 12px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
@@ -193,9 +190,9 @@
             color: var(--text-main);
             flex-grow: 1;
             padding-right: 10px;
+            word-break: break-word; /* Prevenir texto a sair do ecrã */
         }
 
-        /* Estado Comprado/Rasurado */
         .item-card.bought {
             background: rgba(0, 0, 0, 0.2);
             border-color: transparent;
@@ -208,11 +205,10 @@
         }
 
         /* Botões de Ação */
-        .actions { display: flex; gap: 12px; align-items: center; }
+        .actions { display: flex; gap: 10px; align-items: center; }
 
         .icon-btn {
             border: none;
-            background: rgba(255,255,255,0.08);
             width: 42px;
             height: 42px;
             border-radius: 12px;
@@ -221,36 +217,49 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
-            color: white;
+            font-size: 1.1rem; /* Icones mais legiveis */
         }
 
-        /* Botão Visto (Neon Green) */
-        .btn-check { color: var(--success-color); border: 1px solid rgba(0, 242, 96, 0.2); }
+        /* Botão Visto */
+        .btn-check { 
+            background: rgba(255,255,255,0.08);
+            color: var(--success-color); 
+            border: 1px solid rgba(0, 242, 96, 0.2); 
+        }
         .btn-check:active { 
             background: var(--success-color); 
             color: black; 
             box-shadow: 0 0 15px var(--success-color);
         }
 
-        /* Botão X (Neon Red) */
-        .btn-cross { color: var(--danger-color); border: 1px solid rgba(255, 0, 85, 0.2); }
+        /* Botão X */
+        .btn-cross { 
+            background: rgba(255,255,255,0.08);
+            color: var(--danger-color); 
+            border: 1px solid rgba(255, 0, 85, 0.2); 
+        }
         .btn-cross:active { 
             background: var(--danger-color); 
             color: white;
             box-shadow: 0 0 15px var(--danger-color);
         }
 
-        /* Botão Delete */
+        /* Botão LIXEIRA (CORRIGIDO) */
         .btn-delete { 
-            background: transparent; 
-            color: #586377; 
-            width: 30px; 
-            height: 30px; 
-            font-size: 0.9rem;
+            /* Fundo subtil avermelhado para indicar função */
+            background: rgba(255, 0, 85, 0.15); 
+            /* Texto claro (rosa claro) para alto contraste */
+            color: #ffb3c6; 
+            border: 1px solid rgba(255, 0, 85, 0.3);
         }
-        .btn-delete:hover { color: var(--danger-color); }
+        
+        .btn-delete:active {
+            background: var(--danger-color);
+            color: white;
+            box-shadow: 0 0 20px var(--danger-color);
+            transform: scale(0.95);
+        }
 
-        /* Animação de entrada */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -299,7 +308,7 @@
     </div>
 
     <script>
-        /* --- LÓGICA (JavaScript) - Intacta e Robusta --- */
+        /* --- LÓGICA (JavaScript) --- */
         
         let items = JSON.parse(localStorage.getItem('myInventoryFuturistic')) || [];
         renderList();
@@ -327,7 +336,6 @@
             const name = input.value.trim();
 
             if (name) {
-                // Capitalizar a primeira letra para ficar bonito
                 const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
                 items.push({ name: formattedName, bought: false });
                 saveAndRender();
@@ -374,13 +382,15 @@
                 card.className = `item-card ${item.bought ? 'bought' : ''}`;
 
                 let actionButton = '';
-                // Ícones Unicode minimalistas
                 if (!item.bought) {
+                    // Check
                     actionButton = `<button class="icon-btn btn-check" onclick="toggleItem(${index}, true)">&#10003;</button>`;
                 } else {
+                    // X
                     actionButton = `<button class="icon-btn btn-cross" onclick="toggleItem(${index}, false)">&#10005;</button>`;
                 }
 
+                // LIXO (Agora com a classe corrigida)
                 const deleteBtn = `<button class="icon-btn btn-delete" onclick="deleteItem(${index})">&#128465;</button>`;
 
                 card.innerHTML = `
