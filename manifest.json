@@ -6,7 +6,7 @@
   "scope": "/listadecompras/",
   "display": "standalone",
   "background_color": "#121212",
-  "theme_color": "#ff9800",
+  "theme_color": "#24243e",
   "icons": [
     {
       "src": "/listadecompras/images/icon-192x192.png",
